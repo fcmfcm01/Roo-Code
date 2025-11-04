@@ -801,6 +801,13 @@
 		"enableR1Format": "Enable R1 model parameters",
 		"enableR1FormatTips": "Must be enabled when using R1 models such as QWQ to prevent 400 errors",
 		"useAzure": "Use Azure",
+		"useAzureDescription": "Enable Azure OpenAI Service for embedding requests",
+		"azureEndpointUrlLabel": "Azure Endpoint URL",
+		"azureEndpointUrlPlaceholder": "https://your-resource.openai.azure.com",
+		"azureDeploymentNameLabel": "Azure Deployment Name",
+		"azureDeploymentNamePlaceholder": "your-deployment-name",
+		"azureApiVersionLabel": "Azure API Version",
+		"azureApiVersionPlaceholder": "2023-05-15",
 		"azureApiVersion": "Set Azure API version",
 		"gemini": {
 			"freeRequests": "* Free up to {{count}} requests per minute. After that, billing depends on prompt size.",

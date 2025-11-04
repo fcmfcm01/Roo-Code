@@ -300,6 +300,12 @@ export interface WebviewMessage {
 		codebaseIndexSearchMaxResults?: number
 		codebaseIndexSearchMinScore?: number
 
+		// Azure-specific settings
+		codebaseIndexOpenAiCompatibleUseAzure?: boolean
+		codebaseIndexAzureEndpointUrl?: string
+		codebaseIndexAzureDeploymentName?: string
+		codebaseIndexAzureApiVersion?: string
+
 		// Secret settings
 		codeIndexOpenAiKey?: string
 		codeIndexQdrantApiKey?: string

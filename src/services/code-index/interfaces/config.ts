@@ -11,7 +11,14 @@ export interface CodeIndexConfig {
 	modelDimension?: number // Generic dimension property for all providers
 	openAiOptions?: ApiHandlerOptions
 	ollamaOptions?: ApiHandlerOptions
-	openAiCompatibleOptions?: { baseUrl: string; apiKey: string }
+	openAiCompatibleOptions?: { 
+		baseUrl: string
+		apiKey: string
+		useAzure?: boolean
+		azureEndpointUrl?: string
+		azureDeploymentName?: string
+		azureApiVersion?: string
+	}
 	geminiOptions?: { apiKey: string }
 	mistralOptions?: { apiKey: string }
 	vercelAiGatewayOptions?: { apiKey: string }
@@ -35,6 +42,10 @@ export type PreviousConfigSnapshot = {
 	ollamaBaseUrl?: string
 	openAiCompatibleBaseUrl?: string
 	openAiCompatibleApiKey?: string
+	openAiCompatibleUseAzure?: boolean
+	azureEndpointUrl?: string
+	azureDeploymentName?: string
+	azureApiVersion?: string
 	geminiApiKey?: string
 	mistralApiKey?: string
 	vercelAiGatewayApiKey?: string

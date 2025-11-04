@@ -69,6 +69,10 @@ export class CodeIndexConfigManager {
 		// Fix: Read OpenAI Compatible settings from the correct location within codebaseIndexConfig
 		const openAiCompatibleBaseUrl = codebaseIndexConfig.codebaseIndexOpenAiCompatibleBaseUrl ?? ""
 		const openAiCompatibleApiKey = this.contextProxy?.getSecret("codebaseIndexOpenAiCompatibleApiKey") ?? ""
+		const openAiCompatibleUseAzure = codebaseIndexConfig.codebaseIndexOpenAiCompatibleUseAzure ?? false
+		const azureEndpointUrl = codebaseIndexConfig.codebaseIndexAzureEndpointUrl ?? ""
+		const azureDeploymentName = codebaseIndexConfig.codebaseIndexAzureDeploymentName ?? ""
+		const azureApiVersion = codebaseIndexConfig.codebaseIndexAzureApiVersion ?? "2023-05-15"
 		const geminiApiKey = this.contextProxy?.getSecret("codebaseIndexGeminiApiKey") ?? ""
 		const mistralApiKey = this.contextProxy?.getSecret("codebaseIndexMistralApiKey") ?? ""
 		const vercelAiGatewayApiKey = this.contextProxy?.getSecret("codebaseIndexVercelAiGatewayApiKey") ?? ""
@@ -127,6 +131,10 @@ export class CodeIndexConfigManager {
 				? {
 						baseUrl: openAiCompatibleBaseUrl,
 						apiKey: openAiCompatibleApiKey,
+						useAzure: openAiCompatibleUseAzure,
+						azureEndpointUrl: azureEndpointUrl,
+						azureDeploymentName: azureDeploymentName,
+						azureApiVersion: azureApiVersion,
 					}
 				: undefined
 
@@ -170,6 +178,10 @@ export class CodeIndexConfigManager {
 			ollamaBaseUrl: this.ollamaOptions?.ollamaBaseUrl ?? "",
 			openAiCompatibleBaseUrl: this.openAiCompatibleOptions?.baseUrl ?? "",
 			openAiCompatibleApiKey: this.openAiCompatibleOptions?.apiKey ?? "",
+			openAiCompatibleUseAzure: this.openAiCompatibleOptions?.useAzure ?? false,
+			azureEndpointUrl: this.openAiCompatibleOptions?.azureEndpointUrl ?? "",
+			azureDeploymentName: this.openAiCompatibleOptions?.azureDeploymentName ?? "",
+			azureApiVersion: this.openAiCompatibleOptions?.azureApiVersion ?? "",
 			geminiApiKey: this.geminiOptions?.apiKey ?? "",
 			mistralApiKey: this.mistralOptions?.apiKey ?? "",
 			vercelAiGatewayApiKey: this.vercelAiGatewayOptions?.apiKey ?? "",
@@ -278,6 +290,10 @@ export class CodeIndexConfigManager {
 		const prevOllamaBaseUrl = prev?.ollamaBaseUrl ?? ""
 		const prevOpenAiCompatibleBaseUrl = prev?.openAiCompatibleBaseUrl ?? ""
 		const prevOpenAiCompatibleApiKey = prev?.openAiCompatibleApiKey ?? ""
+		const prevOpenAiCompatibleUseAzure = prev?.openAiCompatibleUseAzure ?? false
+		const prevAzureEndpointUrl = prev?.azureEndpointUrl ?? ""
+		const prevAzureDeploymentName = prev?.azureDeploymentName ?? ""
+		const prevAzureApiVersion = prev?.azureApiVersion ?? ""
 		const prevModelDimension = prev?.modelDimension
 		const prevGeminiApiKey = prev?.geminiApiKey ?? ""
 		const prevMistralApiKey = prev?.mistralApiKey ?? ""
@@ -317,6 +333,10 @@ export class CodeIndexConfigManager {
 		const currentOllamaBaseUrl = this.ollamaOptions?.ollamaBaseUrl ?? ""
 		const currentOpenAiCompatibleBaseUrl = this.openAiCompatibleOptions?.baseUrl ?? ""
 		const currentOpenAiCompatibleApiKey = this.openAiCompatibleOptions?.apiKey ?? ""
+		const currentOpenAiCompatibleUseAzure = this.openAiCompatibleOptions?.useAzure ?? false
+		const currentAzureEndpointUrl = this.openAiCompatibleOptions?.azureEndpointUrl ?? ""
+		const currentAzureDeploymentName = this.openAiCompatibleOptions?.azureDeploymentName ?? ""
+		const currentAzureApiVersion = this.openAiCompatibleOptions?.azureApiVersion ?? ""
 		const currentModelDimension = this.modelDimension
 		const currentGeminiApiKey = this.geminiOptions?.apiKey ?? ""
 		const currentMistralApiKey = this.mistralOptions?.apiKey ?? ""
@@ -337,6 +357,23 @@ export class CodeIndexConfigManager {
 			prevOpenAiCompatibleBaseUrl !== currentOpenAiCompatibleBaseUrl ||
 			prevOpenAiCompatibleApiKey !== currentOpenAiCompatibleApiKey
 		) {
+			return true
+		}
+
+		// Azure-specific configuration changes
+		if (prevOpenAiCompatibleUseAzure !== currentOpenAiCompatibleUseAzure) {
+			return true
+		}
+
+		if (prevAzureEndpointUrl !== currentAzureEndpointUrl) {
+			return true
+		}
+
+		if (prevAzureDeploymentName !== currentAzureDeploymentName) {
+			return true
+		}
+
+		if (prevAzureApiVersion !== currentAzureApiVersion) {
 			return true
 		}
 

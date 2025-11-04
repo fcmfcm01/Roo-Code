@@ -64,6 +64,10 @@ export class CodeIndexServiceFactory {
 				config.openAiCompatibleOptions.baseUrl,
 				config.openAiCompatibleOptions.apiKey,
 				config.modelId,
+				config.openAiCompatibleOptions.useAzure,
+				config.openAiCompatibleOptions.azureEndpointUrl,
+				config.openAiCompatibleOptions.azureDeploymentName,
+				config.openAiCompatibleOptions.azureApiVersion
 			)
 		} else if (provider === "gemini") {
 			if (!config.geminiOptions?.apiKey) {

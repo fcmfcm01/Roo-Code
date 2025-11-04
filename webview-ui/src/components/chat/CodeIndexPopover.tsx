@@ -65,6 +65,12 @@ interface LocalCodeIndexSettings {
 	codebaseIndexSearchMaxResults?: number
 	codebaseIndexSearchMinScore?: number
 
+	// Azure-specific settings
+	codebaseIndexOpenAiCompatibleUseAzure?: boolean
+	codebaseIndexAzureEndpointUrl?: string
+	codebaseIndexAzureDeploymentName?: string
+	codebaseIndexAzureApiVersion?: string
+
 	// Secret settings (start empty, will be loaded separately)
 	codeIndexOpenAiKey?: string
 	codeIndexQdrantApiKey?: string
@@ -198,6 +204,10 @@ export const CodeIndexPopover: React.FC<CodeIndexPopoverProps> = ({
 		codebaseIndexEmbedderModelDimension: undefined,
 		codebaseIndexSearchMaxResults: CODEBASE_INDEX_DEFAULTS.DEFAULT_SEARCH_RESULTS,
 		codebaseIndexSearchMinScore: CODEBASE_INDEX_DEFAULTS.DEFAULT_SEARCH_MIN_SCORE,
+		codebaseIndexOpenAiCompatibleUseAzure: false,
+		codebaseIndexAzureEndpointUrl: "",
+		codebaseIndexAzureDeploymentName: "",
+		codebaseIndexAzureApiVersion: "2023-05-15",
 		codeIndexOpenAiKey: "",
 		codeIndexQdrantApiKey: "",
 		codebaseIndexOpenAiCompatibleBaseUrl: "",
@@ -222,7 +232,7 @@ export const CodeIndexPopover: React.FC<CodeIndexPopoverProps> = ({
 	// Initialize settings from global state
 	useEffect(() => {
 		if (codebaseIndexConfig) {
-			const settings = {
+			const settings: LocalCodeIndexSettings = {
 				codebaseIndexEnabled: codebaseIndexConfig.codebaseIndexEnabled ?? true,
 				codebaseIndexQdrantUrl: codebaseIndexConfig.codebaseIndexQdrantUrl || "",
 				codebaseIndexEmbedderProvider: codebaseIndexConfig.codebaseIndexEmbedderProvider || "openai",
@@ -234,6 +244,10 @@ export const CodeIndexPopover: React.FC<CodeIndexPopoverProps> = ({
 					codebaseIndexConfig.codebaseIndexSearchMaxResults ?? CODEBASE_INDEX_DEFAULTS.DEFAULT_SEARCH_RESULTS,
 				codebaseIndexSearchMinScore:
 					codebaseIndexConfig.codebaseIndexSearchMinScore ?? CODEBASE_INDEX_DEFAULTS.DEFAULT_SEARCH_MIN_SCORE,
+				codebaseIndexOpenAiCompatibleUseAzure: codebaseIndexConfig.codebaseIndexOpenAiCompatibleUseAzure ?? false,
+				codebaseIndexAzureEndpointUrl: codebaseIndexConfig.codebaseIndexAzureEndpointUrl || "",
+				codebaseIndexAzureDeploymentName: codebaseIndexConfig.codebaseIndexAzureDeploymentName || "",
+				codebaseIndexAzureApiVersion: codebaseIndexConfig.codebaseIndexAzureApiVersion || "2023-05-15",
 				codeIndexOpenAiKey: "",
 				codeIndexQdrantApiKey: "",
 				codebaseIndexOpenAiCompatibleBaseUrl: codebaseIndexConfig.codebaseIndexOpenAiCompatibleBaseUrl || "",
@@ -850,6 +864,91 @@ export const CodeIndexPopover: React.FC<CodeIndexPopoverProps> = ({
 
 									{currentSettings.codebaseIndexEmbedderProvider === "openai-compatible" && (
 										<>
+											{/* Azure Support Toggle */}
+											<div className="space-y-2">
+												<div className="flex items-center gap-2">
+													<VSCodeCheckbox
+														checked={currentSettings.codebaseIndexOpenAiCompatibleUseAzure || false}
+														onChange={(e: any) =>
+															updateSetting("codebaseIndexOpenAiCompatibleUseAzure", e.target.checked)
+														}>
+														<span className="font-medium">{t("settings:codeIndex.useAzure")}</span>
+													</VSCodeCheckbox>
+													<StandardTooltip content={t("settings:codeIndex.useAzureDescription")}>
+														<span className="codicon codicon-info text-xs text-vscode-descriptionForeground cursor-help" />
+													</StandardTooltip>
+												</div>
+											</div>
+
+											{/* Azure-specific configuration fields */}
+											{currentSettings.codebaseIndexOpenAiCompatibleUseAzure && (
+												<>
+													<div className="space-y-2">
+														<label className="text-sm font-medium">
+															{t("settings:codeIndex.azureEndpointUrlLabel")}
+														</label>
+														<VSCodeTextField
+															value={currentSettings.codebaseIndexAzureEndpointUrl || ""}
+															onInput={(e: any) =>
+																updateSetting("codebaseIndexAzureEndpointUrl", e.target.value)
+															}
+															placeholder={t("settings:codeIndex.azureEndpointUrlPlaceholder")}
+															className={cn("w-full", {
+																"border-red-500": formErrors.codebaseIndexAzureEndpointUrl,
+															})}
+														/>
+														{formErrors.codebaseIndexAzureEndpointUrl && (
+															<p className="text-xs text-vscode-errorForeground mt-1 mb-0">
+																{formErrors.codebaseIndexAzureEndpointUrl}
+															</p>
+														)}
+													</div>
+
+													<div className="space-y-2">
+														<label className="text-sm font-medium">
+															{t("settings:codeIndex.azureDeploymentNameLabel")}
+														</label>
+														<VSCodeTextField
+															value={currentSettings.codebaseIndexAzureDeploymentName || ""}
+															onInput={(e: any) =>
+																updateSetting("codebaseIndexAzureDeploymentName", e.target.value)
+															}
+															placeholder={t("settings:codeIndex.azureDeploymentNamePlaceholder")}
+															className={cn("w-full", {
+																"border-red-500": formErrors.codebaseIndexAzureDeploymentName,
+															})}
+														/>
+														{formErrors.codebaseIndexAzureDeploymentName && (
+															<p className="text-xs text-vscode-errorForeground mt-1 mb-0">
+																{formErrors.codebaseIndexAzureDeploymentName}
+															</p>
+														)}
+													</div>
+
+													<div className="space-y-2">
+														<label className="text-sm font-medium">
+															{t("settings:codeIndex.azureApiVersionLabel")}
+														</label>
+														<VSCodeTextField
+															value={currentSettings.codebaseIndexAzureApiVersion || "2023-05-15"}
+															onInput={(e: any) =>
+																updateSetting("codebaseIndexAzureApiVersion", e.target.value)
+															}
+															placeholder={t("settings:codeIndex.azureApiVersionPlaceholder")}
+															className={cn("w-full", {
+																"border-red-500": formErrors.codebaseIndexAzureApiVersion,
+															})}
+														/>
+														{formErrors.codebaseIndexAzureApiVersion && (
+															<p className="text-xs text-vscode-errorForeground mt-1 mb-0">
+																{formErrors.codebaseIndexAzureApiVersion}
+															</p>
+														)}
+													</div>
+												</>
+											)}
+
+											{/* Common fields for both Azure and non-Azure */}
 											<div className="space-y-2">
 												<label className="text-sm font-medium">
 													{t("settings:codeIndex.openAiCompatibleBaseUrlLabel")}

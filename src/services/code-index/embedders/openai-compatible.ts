@@ -39,6 +39,10 @@ export class OpenAICompatibleEmbedder implements IEmbedder {
 	private readonly apiKey: string
 	private readonly isFullUrl: boolean
 	private readonly maxItemTokens: number
+	private readonly isAzure: boolean
+	private readonly azureEndpointUrl?: string
+	private readonly azureDeploymentName?: string
+	private readonly azureApiVersion?: string
 
 	// Global rate limiting state shared across all instances
 	private static globalRateLimitState = {
@@ -56,8 +60,21 @@ export class OpenAICompatibleEmbedder implements IEmbedder {
 	 * @param apiKey The API key for authentication
 	 * @param modelId Optional model identifier (defaults to "text-embedding-3-small")
 	 * @param maxItemTokens Optional maximum tokens per item (defaults to MAX_ITEM_TOKENS)
+	 * @param isAzure Optional flag indicating if this is an Azure OpenAI endpoint
+	 * @param azureEndpointUrl Optional Azure endpoint URL
+	 * @param azureDeploymentName Optional Azure deployment name
+	 * @param azureApiVersion Optional Azure API version
 	 */
-	constructor(baseUrl: string, apiKey: string, modelId?: string, maxItemTokens?: number) {
+	constructor(
+		baseUrl: string, 
+		apiKey: string, 
+		modelId?: string, 
+		maxItemTokens?: number,
+		isAzure: boolean = false,
+		azureEndpointUrl?: string,
+		azureDeploymentName?: string,
+		azureApiVersion?: string
+	) {
 		if (!baseUrl) {
 			throw new Error(t("embeddings:validation.baseUrlRequired"))
 		}
@@ -67,12 +84,21 @@ export class OpenAICompatibleEmbedder implements IEmbedder {
 
 		this.baseUrl = baseUrl
 		this.apiKey = apiKey
+		this.isAzure = isAzure
+		this.azureEndpointUrl = azureEndpointUrl
+		this.azureDeploymentName = azureDeploymentName
+		this.azureApiVersion = azureApiVersion || "2023-05-15"
+
+		// For Azure, use the Azure endpoint URL if provided, otherwise use the base URL
+		const effectiveBaseUrl = isAzure && azureEndpointUrl ? azureEndpointUrl : baseUrl
 
 		// Wrap OpenAI client creation to handle invalid API key characters
 		try {
 			this.embeddingsClient = new OpenAI({
-				baseURL: baseUrl,
+				baseURL: effectiveBaseUrl,
 				apiKey: apiKey,
+				defaultQuery: isAzure && azureApiVersion ? { "api-version": azureApiVersion } : undefined,
+				defaultHeaders: isAzure ? { "api-key": apiKey } : undefined,
 			})
 		} catch (error) {
 			// Use the error handler to transform ByteString conversion errors
@@ -204,18 +230,42 @@ export class OpenAICompatibleEmbedder implements IEmbedder {
 		batchTexts: string[],
 		model: string,
 	): Promise<OpenAIEmbeddingResponse> {
-		const response = await fetch(url, {
+		// Construct Azure-specific URL if needed
+		let effectiveUrl = url
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+		}
+
+		if (this.isAzure) {
+			// Azure OpenAI Service uses api-key header
+			headers["api-key"] = this.apiKey
+			
+			// If we have a deployment name, construct the proper Azure endpoint URL
+			if (this.azureDeploymentName) {
+				const baseUrl = url.split('?')[0]
+				const queryParams = new URLSearchParams(url.split('?')[1] || '')
+				
+				// Add API version if not already present
+				if (!queryParams.has('api-version') && this.azureApiVersion) {
+					queryParams.set('api-version', this.azureApiVersion)
+				}
+				
+				// Construct Azure OpenAI endpoint URL
+				effectiveUrl = `${baseUrl}/deployments/${this.azureDeploymentName}/embeddings${queryParams.toString() ? '?' + queryParams.toString() : ''}`
+			}
+		} else {
+			// Standard OpenAI-compatible API uses Authorization header
+			headers.Authorization = `Bearer ${this.apiKey}`
+			// Also try api-key for compatibility
+			headers["api-key"] = this.apiKey
+		}
+
+		const response = await fetch(effectiveUrl, {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				// Azure OpenAI uses 'api-key' header, while OpenAI uses 'Authorization'
-				// We'll try 'api-key' first for Azure compatibility
-				"api-key": this.apiKey,
-				Authorization: `Bearer ${this.apiKey}`,
-			},
+			headers: headers,
 			body: JSON.stringify({
 				input: batchTexts,
-				model: model,
+				model: this.isAzure && this.azureDeploymentName ? this.azureDeploymentName : model,
 				encoding_format: "base64",
 			}),
 		})
@@ -267,7 +317,15 @@ export class OpenAICompatibleEmbedder implements IEmbedder {
 			try {
 				let response: OpenAIEmbeddingResponse
 
-				if (isFullUrl) {
+				if (this.isAzure && this.azureDeploymentName) {
+					// Azure-specific logic using deployment name
+					const azureModel = this.azureDeploymentName
+					response = (await this.embeddingsClient.embeddings.create({
+						input: batchTexts,
+						model: azureModel,
+						encoding_format: "base64",
+					})) as OpenAIEmbeddingResponse
+				} else if (isFullUrl) {
 					// Use direct HTTP request for full endpoint URLs
 					response = await this.makeDirectEmbeddingRequest(this.baseUrl, batchTexts, model)
 				} else {
@@ -369,7 +427,14 @@ export class OpenAICompatibleEmbedder implements IEmbedder {
 
 				let response: OpenAIEmbeddingResponse
 
-				if (this.isFullUrl) {
+				if (this.isAzure && this.azureDeploymentName) {
+					// Test Azure-specific configuration
+					response = (await this.embeddingsClient.embeddings.create({
+						input: testTexts,
+						model: this.azureDeploymentName,
+						encoding_format: "base64",
+					})) as OpenAIEmbeddingResponse
+				} else if (this.isFullUrl) {
 					// Test direct HTTP request for full endpoint URLs
 					response = await this.makeDirectEmbeddingRequest(this.baseUrl, testTexts, modelToUse)
 				} else {
@@ -407,7 +472,10 @@ export class OpenAICompatibleEmbedder implements IEmbedder {
 	 */
 	get embedderInfo(): EmbedderInfo {
 		return {
-			name: "openai-compatible",
+			name: this.isAzure ? "azure-openai" : "openai-compatible",
+			provider: this.isAzure ? "azure" : "openai-compatible",
+			endpoint: this.isAzure ? this.azureEndpointUrl : this.baseUrl,
+			deployment: this.azureDeploymentName,
 		}
 	}
 

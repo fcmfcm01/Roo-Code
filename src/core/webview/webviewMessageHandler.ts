@@ -2518,6 +2518,10 @@ export const webviewMessageHandler = async (
 					codebaseIndexEmbedderModelId: settings.codebaseIndexEmbedderModelId,
 					codebaseIndexEmbedderModelDimension: settings.codebaseIndexEmbedderModelDimension, // Generic dimension
 					codebaseIndexOpenAiCompatibleBaseUrl: settings.codebaseIndexOpenAiCompatibleBaseUrl,
+					codebaseIndexOpenAiCompatibleUseAzure: settings.codebaseIndexOpenAiCompatibleUseAzure ?? false,
+					codebaseIndexAzureEndpointUrl: settings.codebaseIndexAzureEndpointUrl,
+					codebaseIndexAzureDeploymentName: settings.codebaseIndexAzureDeploymentName,
+					codebaseIndexAzureApiVersion: settings.codebaseIndexAzureApiVersion,
 					codebaseIndexSearchMaxResults: settings.codebaseIndexSearchMaxResults,
 					codebaseIndexSearchMinScore: settings.codebaseIndexSearchMinScore,
 				}

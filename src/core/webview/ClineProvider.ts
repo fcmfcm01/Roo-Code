@@ -1971,6 +1971,10 @@ export class ClineProvider
 				codebaseIndexEmbedderModelId: codebaseIndexConfig?.codebaseIndexEmbedderModelId ?? "",
 				codebaseIndexEmbedderModelDimension: codebaseIndexConfig?.codebaseIndexEmbedderModelDimension ?? 1536,
 				codebaseIndexOpenAiCompatibleBaseUrl: codebaseIndexConfig?.codebaseIndexOpenAiCompatibleBaseUrl,
+				codebaseIndexOpenAiCompatibleUseAzure: codebaseIndexConfig?.codebaseIndexOpenAiCompatibleUseAzure ?? false,
+				codebaseIndexAzureEndpointUrl: codebaseIndexConfig?.codebaseIndexAzureEndpointUrl,
+				codebaseIndexAzureDeploymentName: codebaseIndexConfig?.codebaseIndexAzureDeploymentName,
+				codebaseIndexAzureApiVersion: codebaseIndexConfig?.codebaseIndexAzureApiVersion,
 				codebaseIndexSearchMaxResults: codebaseIndexConfig?.codebaseIndexSearchMaxResults,
 				codebaseIndexSearchMinScore: codebaseIndexConfig?.codebaseIndexSearchMinScore,
 			},
@@ -2192,6 +2196,14 @@ export class ClineProvider
 					stateValues.codebaseIndexConfig?.codebaseIndexEmbedderModelDimension,
 				codebaseIndexOpenAiCompatibleBaseUrl:
 					stateValues.codebaseIndexConfig?.codebaseIndexOpenAiCompatibleBaseUrl,
+				codebaseIndexOpenAiCompatibleUseAzure:
+					stateValues.codebaseIndexConfig?.codebaseIndexOpenAiCompatibleUseAzure ?? false,
+				codebaseIndexAzureEndpointUrl:
+					stateValues.codebaseIndexConfig?.codebaseIndexAzureEndpointUrl,
+				codebaseIndexAzureDeploymentName:
+					stateValues.codebaseIndexConfig?.codebaseIndexAzureDeploymentName,
+				codebaseIndexAzureApiVersion:
+					stateValues.codebaseIndexConfig?.codebaseIndexAzureApiVersion,
 				codebaseIndexSearchMaxResults: stateValues.codebaseIndexConfig?.codebaseIndexSearchMaxResults,
 				codebaseIndexSearchMinScore: stateValues.codebaseIndexConfig?.codebaseIndexSearchMinScore,
 			},
